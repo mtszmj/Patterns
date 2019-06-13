@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using JetBrains.dotMemoryUnit;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,34 @@ namespace UnitTests
                 return true;
             }
             return false;
+        }
+    }
+
+    [TestFixture]
+    public class MemoryTests
+    {
+        [Test]
+        public void Test()
+        {
+            dotMemory.Check(memory =>
+            {
+                Assert.That(memory.GetObjects(
+                    where => where.Type.Is<BankAccount>()
+                    ).ObjectsCount, Is.EqualTo(0));
+            });
+        }
+
+        [Test]
+        public void Test2()
+        {
+            var checkpoint1 = dotMemory.Check();
+            //
+            var checkpoint2 = dotMemory.Check(memory =>
+            {
+                Assert.That(memory.GetTrafficFrom(checkpoint1)
+                    .Where(obj => obj.Interface.Is<IEnumerable<int>>())
+                    .AllocatedMemory.SizeInBytes, Is.LessThan(1000));
+            });
         }
     }
 
